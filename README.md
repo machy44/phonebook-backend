@@ -1,5 +1,3 @@
 # phonebook-backend
 
-fullstackopen part3 submodule
-
-test test
+submodule of fullstackopen part3
