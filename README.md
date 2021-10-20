@@ -1,3 +1,3 @@
 # phonebook-backend
 
-submodule of fullstackopen part3
+deploy link: https://infinite-forest-20975.herokuapp.com
