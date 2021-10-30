@@ -1,12 +1,12 @@
 const express = require("express");
 const generateId = require("./utils.js").generateId;
+const middlewares = require("./middlewares");
+
 const morgan = require("morgan");
 const cors = require("cors");
 require("dotenv").config();
 
 const Person = require("./modules/person");
-
-require.dotE;
 
 const app = express();
 
@@ -27,15 +27,36 @@ app.get("/api/persons", (request, response) => {
 });
 
 app.get("/api/persons/:id", (request, response) => {
-  Person.findById(request.params.id).then((person) => {
-    response.json(person);
-  });
+  Person.findById(request.params.id)
+    .then((person) => {
+      if (person) {
+        response.json(person);
+      } else {
+        response.status(404).end();
+      }
+    })
+    .catch((error) => {
+      return next(error);
+    });
 });
 
 app.delete("/api/persons/:id", (request, response) => {
-  Person.deleteOne({ _id: request.params.id }).then(() => {
+  Person.findByIdAndRemove(request.params.id).then(() => {
     response.status(204).end();
   });
+});
+
+app.put("/api/persons/:id", (request, response) => {
+  const person = {
+    name: request.body.name,
+    number: request.body.number,
+  };
+
+  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    .then((updatedPerson) => {
+      response.json(updatedPerson);
+    })
+    .catch((error) => next(error));
 });
 
 app.post("/api/persons", async (request, response) => {
@@ -73,6 +94,10 @@ app.get("/info", (request, response) => {
       `);
   });
 });
+
+app.use(middlewares.unknownEndpoint);
+
+app.use(middlewares.errorHandler);
 
 const PORT = process.env.PORT;
 
