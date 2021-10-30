@@ -10,6 +10,11 @@ const errorHandler = (error, request, response, next) => {
       error: "malformatted id",
     });
   }
+  if (error.name === "ValidationError") {
+    return response.status(400).json({
+      error: error.message,
+    });
+  }
 
   next(error); // default Express error handler.
 };
