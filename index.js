@@ -1,32 +1,31 @@
-const express = require("express");
-const generateId = require("./utils.js").generateId;
-const middlewares = require("./middlewares");
+const express = require('express');
+const middlewares = require('./middlewares');
 
-const morgan = require("morgan");
-const cors = require("cors");
-require("dotenv").config();
+const morgan = require('morgan');
+const cors = require('cors');
+require('dotenv').config();
 
-const Person = require("./modules/person");
+const Person = require('./modules/person');
 
 const app = express();
 
 app.use(cors());
-app.use(express.static("build"));
+app.use(express.static('build'));
 app.use(express.json());
 
-morgan.token("body", (req, res) => JSON.stringify(req.body));
+morgan.token('body', (req) => JSON.stringify(req.body));
 
 app.use(
-  morgan(":method :url :status :res[content-length] - :response-time ms  :body")
+  morgan(':method :url :status :res[content-length] - :response-time ms  :body')
 );
 
-app.get("/api/persons", (request, response) => {
+app.get('/api/persons', (request, response) => {
   Person.find().then((persons) => {
     response.json(persons);
   });
 });
 
-app.get("/api/persons/:id", (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
     .then((person) => {
       if (person) {
@@ -40,7 +39,7 @@ app.get("/api/persons/:id", (request, response) => {
     });
 });
 
-app.delete("/api/persons/:id", (request, response) => {
+app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
     .then(() => {
       response.status(204).end();
@@ -48,7 +47,7 @@ app.delete("/api/persons/:id", (request, response) => {
     .catch((error) => next(error));
 });
 
-app.put("/api/persons/:id", (request, response, next) => {
+app.put('/api/persons/:id', (request, response, next) => {
   const person = {
     name: request.body.name,
     number: request.body.number,
@@ -64,7 +63,7 @@ app.put("/api/persons/:id", (request, response, next) => {
     .catch((error) => next(error));
 });
 
-app.post("/api/persons", async (request, response, next) => {
+app.post('/api/persons', async (request, response, next) => {
   const body = request.body;
 
   const person = new Person({
@@ -80,7 +79,7 @@ app.post("/api/persons", async (request, response, next) => {
     .catch((error) => next(error));
 });
 
-app.get("/info", (request, response) => {
+app.get('/info', (request, response) => {
   Person.count().then((res) => {
     response.send(`
       <p>Phoneboook has info for ${res} people</p>
@@ -91,6 +90,7 @@ app.get("/info", (request, response) => {
 
 app.use(middlewares.unknownEndpoint);
 
+// this has to be the last loaded middleware.
 app.use(middlewares.errorHandler);
 
 const PORT = process.env.PORT;
